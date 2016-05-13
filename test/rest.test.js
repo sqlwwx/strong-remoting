@@ -1582,6 +1582,7 @@ describe('strong-remoting-rest', function() {
 
         function method(error) {
           return givenSharedStaticMethod(function(cb) {
+            objects.options.errorHandler.debug = true;
             cb(error);
           });
         }
@@ -1602,7 +1603,7 @@ describe('strong-remoting-rest', function() {
                 var error = res.body.error;
                 expect(error).to.have.property('message').that.match(/multiple errors/);
                 expect(error).to.include.keys('details');
-                expect(error.details).to.include(expectedDetail);
+                expect(error.details).to.include({stack: expectedDetail.stack});
                 done();
               });
           });
@@ -2216,7 +2217,10 @@ describe('strong-remoting-rest', function() {
     }
     inherits(TestError, Error);
 
-    var method = givenSharedStaticMethod(function(cb) { cb(new TestError()); });
+    var method = givenSharedStaticMethod(function(cb) { 
+      objects.options.errorHandler.debug = true;
+      cb(new TestError()); 
+    });
 
     json(method.url)
       .expect(444)
