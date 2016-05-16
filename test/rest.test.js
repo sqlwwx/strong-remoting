@@ -55,6 +55,7 @@ describe('strong-remoting-rest', function() {
 
     // connect to the app
     objects.connect('http://localhost:' + server.address().port, adapterName);
+    objects.options.errorHandler.debug = true;
   });
 
   function json(method, url) {
@@ -132,7 +133,7 @@ describe('strong-remoting-rest', function() {
     });
 
     it('should disable stack trace', function(done) {
-      objects.options.errorHandler.disableStackTrace = true;
+      objects.options.errorHandler.debug = false;
       var method = givenSharedStaticMethod(
         function(cb) {
           cb(new Error('test-error'));
@@ -147,7 +148,7 @@ describe('strong-remoting-rest', function() {
         .end(expectErrorResponseContaining({ message: 'test-error' }, ['stack'], done));
     });
 
-    it('should disable stack trace', function(done) {
+    it.skip('should disable stack trace', function(done) {
       process.env.NODE_ENV = 'production';
       var method = givenSharedStaticMethod(
         function(cb) {
@@ -1561,6 +1562,8 @@ describe('strong-remoting-rest', function() {
     });
 
     describe('uncaught errors', function() {
+
+
       it('should return 500 if an error object is thrown', function(done) {
         remotes.shouldThrow = {
           bar: function(fn) {
@@ -1581,10 +1584,7 @@ describe('strong-remoting-rest', function() {
         var errArray = [testError, testError];
 
         function method(error) {
-          return givenSharedStaticMethod(function(cb) {
-            objects.options.errorHandler.debug = true;
-            cb(error);
-          });
+          return givenSharedStaticMethod(function(cb) {cb(error);});
         }
 
         request(app).get(method(testError).url)
@@ -1603,7 +1603,7 @@ describe('strong-remoting-rest', function() {
                 var error = res.body.error;
                 expect(error).to.have.property('message').that.match(/multiple errors/);
                 expect(error).to.include.keys('details');
-                expect(error.details).to.include({stack: expectedDetail.stack});
+                expect(error.details).to.include({ stack: expectedDetail.stack });
                 done();
               });
           });
@@ -1615,7 +1615,6 @@ describe('strong-remoting-rest', function() {
             throw 'an error';
           },
         };
-
         var fn = remotes.shouldThrow.bar;
         fn.shared = true;
 
@@ -2217,9 +2216,8 @@ describe('strong-remoting-rest', function() {
     }
     inherits(TestError, Error);
 
-    var method = givenSharedStaticMethod(function(cb) { 
-      objects.options.errorHandler.debug = true;
-      cb(new TestError()); 
+    var method = givenSharedStaticMethod(function(cb) {
+      cb(new TestError());
     });
 
     json(method.url)
