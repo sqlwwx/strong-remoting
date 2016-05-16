@@ -1584,7 +1584,9 @@ describe('strong-remoting-rest', function() {
         var errArray = [testError, testError];
 
         function method(error) {
-          return givenSharedStaticMethod(function(cb) { cb(error); });
+          return givenSharedStaticMethod(function(cb) {
+            cb(error);
+          });
         }
 
         request(app).get(method(testError).url)
@@ -2216,9 +2218,7 @@ describe('strong-remoting-rest', function() {
     }
     inherits(TestError, Error);
 
-    var method = givenSharedStaticMethod(function(cb) {
-      cb(new TestError());
-    });
+    var method = givenSharedStaticMethod(function(cb) { cb(new TestError()); });
 
     json(method.url)
       .expect(444)
