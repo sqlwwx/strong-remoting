@@ -55,7 +55,8 @@ describe('strong-remoting-rest', function() {
 
     // connect to the app
     objects.connect('http://localhost:' + server.address().port, adapterName);
-    objects.options.errorHandler.debug = true;
+    var optsErrorHandler = { errorHandler: { debug: true, log: false }};
+    extend(objects.options, optsErrorHandler);
   });
 
   function json(method, url) {
@@ -1563,8 +1564,6 @@ describe('strong-remoting-rest', function() {
     });
 
     describe('uncaught errors', function() {
-
-
       it('should return 500 if an error object is thrown', function(done) {
         remotes.shouldThrow = {
           bar: function(fn) {
@@ -1585,7 +1584,7 @@ describe('strong-remoting-rest', function() {
         var errArray = [testError, testError];
 
         function method(error) {
-          return givenSharedStaticMethod(function(cb) {cb(error);});
+          return givenSharedStaticMethod(function(cb) { cb(error); });
         }
 
         request(app).get(method(testError).url)
