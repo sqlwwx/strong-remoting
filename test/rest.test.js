@@ -1562,8 +1562,6 @@ describe('strong-remoting-rest', function() {
     });
 
     describe('uncaught errors', function() {
-
-
       it('should return 500 if an error object is thrown', function(done) {
         remotes.shouldThrow = {
           bar: function(fn) {
