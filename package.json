@@ -1,5 +1,5 @@
 {
-  "name": "strong-remoting",
+  "name": "strong-remotingnext",
   "description": "StrongLoop Remoting Module",
   "keywords": [
     "StrongLoop",
@@ -64,7 +64,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/strongloop/strong-remoting"
+    "url": "git+https://github.com/sqlwwx/strong-remoting.git"
   },
   "browser": {
     "express": false,
