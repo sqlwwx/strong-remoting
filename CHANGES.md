@@ -1,3 +1,31 @@
+
+
+2016-06-21, Version 2.28.0
+==========================
+
+ * Prioritise auth errors over sharedCtor errors (Miroslav Bajtoš)
+
+ * Add http source "formData" (Fabian Off)
+
+ * Fix integration tests for coercion in REST (Miroslav Bajtoš)
+
+ * Add integration tests for coercion in REST (Miroslav Bajtoš)
+
+
+2016-06-07, Version 2.27.0
+==========================
+
+ * Implement getEndpoints() (Amir Jafarian)
+
+ * Set to no compression when using change stream (Candy)
+
+ * update/insert copyright headers (Ryan Graham)
+
+ * relicense as Artistic-2.0 only (Ryan Graham)
+
+ * Handle array of errors. (Richard Pringle)
+
+
 2016-02-26, Version 2.26.0
 ==========================
 

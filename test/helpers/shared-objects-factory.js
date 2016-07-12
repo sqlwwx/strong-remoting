@@ -1,3 +1,8 @@
+// Copyright IBM Corp. 2013,2016. All Rights Reserved.
+// Node module: strong-remoting
+// This file is licensed under the Artistic License 2.0.
+// License text available at https://opensource.org/licenses/Artistic-2.0
+
 /* Copyright (c) 2013 StrongLoop, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,15 +36,21 @@ exports.createSharedClass =  function createSharedClass(config) {
   SharedClass.shared = true;
 
   SharedClass.sharedCtor = function(id, cb) {
-    cb(null, new SharedClass(id));
+    // allow tests to override the implementation of shared ctor
+    // while preserving remoting metadata
+    this._sharedCtor(id, cb);
   };
 
   extend(SharedClass.sharedCtor, {
     shared: true,
     accepts: [{ arg: 'id', type: 'any', http: { source: 'path' }}],
     http: { path: '/:id' },
-    returns: { root: true }
+    returns: { arg: 'instance', type: 'object', root: true }
   });
+
+  SharedClass._sharedCtor = function(id, cb) {
+    cb(null, new SharedClass(id));
+  };
 
   return SharedClass;
 };

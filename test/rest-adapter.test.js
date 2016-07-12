@@ -1,3 +1,8 @@
+// Copyright IBM Corp. 2014,2016. All Rights Reserved.
+// Node module: strong-remoting
+// This file is licensed under the Artistic License 2.0.
+// License text available at https://opensource.org/licenses/Artistic-2.0
+
 var assert = require('assert');
 var HttpInvocation = require('../lib/http-invocation');
 var extend = require('util')._extend;
@@ -8,6 +13,7 @@ var SharedClass = require('../lib/shared-class');
 var SharedMethod = require('../lib/shared-method');
 var expect = require('chai').expect;
 var factory = require('./helpers/shared-objects-factory.js');
+function NOOP() {}
 
 describe('RestAdapter', function() {
   var remotes;
@@ -213,6 +219,8 @@ describe('RestAdapter', function() {
     });
 
     describe('getHttpMethod', function() {
+      ignoreDeprecationsInThisBlock();
+
       it('returns POST for `all`', function() {
         var method = givenRestStaticMethod({ http: { verb: 'all'} });
         expect(method.getHttpMethod()).to.equal('POST');
@@ -240,6 +248,8 @@ describe('RestAdapter', function() {
     });
 
     describe('getFullPath', function() {
+      ignoreDeprecationsInThisBlock();
+
       it('returns class path + method path', function() {
         var method = givenRestStaticMethod(
           { http: { path: '/a-method' } },
@@ -247,6 +257,37 @@ describe('RestAdapter', function() {
         );
 
         expect(method.getFullPath()).to.equal('/a-class/a-method');
+      });
+    });
+
+    describe('getEndpoints', function() {
+      it('should return verb and fullPath for multiple paths', function() {
+        var method = givenRestStaticMethod({ http: [
+          { verb: 'DEL', path: '/testMethod1' },
+          { verb: 'PUT', path: '/testMethod2' },
+        ] });
+
+        var expectedEndpoints = [
+          {
+            fullPath: '/testClass/testMethod1',
+            verb: 'DELETE',
+          }, {
+            fullPath: '/testClass/testMethod2',
+            verb: 'PUT',
+          },
+        ];
+
+        expect(method.getEndpoints()).to.eql(expectedEndpoints);
+      });
+
+      it('should return verb and fullPath for single path', function() {
+        var method = givenRestStaticMethod({ http: { verb: 'all' }});
+        expect(method.getEndpoints()).to.eql([
+          {
+            verb: 'POST',
+            fullPath: '/testClass/testMethod',
+          },
+        ]);
       });
     });
 
@@ -438,4 +479,14 @@ describe('RestAdapter', function() {
 });
 
 function someFunc() {
+}
+
+function ignoreDeprecationsInThisBlock() {
+  before(function() {
+    process.on('deprecation', NOOP);
+  });
+
+  after(function() {
+    process.removeListener('deprecation', NOOP);
+  });
 }

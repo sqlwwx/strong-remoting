@@ -1,3 +1,8 @@
+// Copyright IBM Corp. 2014,2016. All Rights Reserved.
+// Node module: strong-remoting
+// This file is licensed under the Artistic License 2.0.
+// License text available at https://opensource.org/licenses/Artistic-2.0
+
 var assert = require('assert');
 var extend = require('util')._extend;
 var inherits = require('util').inherits;
@@ -193,6 +198,27 @@ describe('strong-remoting-rest', function() {
             ],
             returns: { arg: 'n', type: 'number' },
             http: { path: '/' }
+          }
+        );
+
+        objects.invoke(method.name, [1, 2], function(err, n) {
+          assert.equal(n, 3);
+          done();
+        });
+      });
+
+      it('should allow arguments in the formData', function(done) {
+        var method = givenSharedStaticMethod(
+          function bar(a, b, cb) {
+            cb(null, a + b);
+          },
+          {
+            accepts: [
+              { arg: 'b', type: 'number', http: { source: 'formData' }},
+              { arg: 'a', type: 'number', http: { source: 'formData' }},
+            ],
+            returns: { arg: 'n', type: 'number' },
+            http: { path: '/' },
           }
         );
 

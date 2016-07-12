@@ -1,3 +1,8 @@
+// Copyright IBM Corp. 2013,2016. All Rights Reserved.
+// Node module: strong-remoting
+// This file is licensed under the Artistic License 2.0.
+// License text available at https://opensource.org/licenses/Artistic-2.0
+
 var assert = require('assert');
 var extend = require('util')._extend;
 var inherits = require('util').inherits;
@@ -1577,6 +1582,70 @@ describe('strong-remoting-rest', function() {
           .end(expectErrorResponseContaining({message: 'an error'}, done));
       });
 
+      it('should return 500 if an array of errors is thrown', function(done) {
+        var testError = new Error('expected test error');
+        var errArray = [testError, testError];
+
+        function method(error) {
+          return givenSharedStaticMethod(function(cb) {
+            cb(error);
+          });
+        }
+
+        request(app).get(method(testError).url)
+          .set('Accept', 'application/json')
+          .expect(500)
+          .end(function(err, res) {
+            if (err) return done(err);
+            var expectedDetail = res.body.error;
+            delete expectedDetail.statusCode;
+
+            request(app).get(method(errArray).url)
+              .set('Accept', 'application/json')
+              .expect(500)
+              .end(function(err, res) {
+                if (err) return done(err);
+                var error = res.body.error;
+                expect(error).to.have.property('message').that.match(/multiple errors/);
+                expect(error).to.include.keys('details');
+                expect(error.details).to.include(expectedDetail);
+                done();
+              });
+          });
+      });
+
+      it('should return 500 if an array of errors is thrown', function(done) {
+        var testError = new Error('expected test error');
+        var errArray = [testError, testError];
+
+        function method(error) {
+          return givenSharedStaticMethod(function(cb) {
+            cb(error);
+          });
+        }
+
+        request(app).get(method(testError).url)
+          .set('Accept', 'application/json')
+          .expect(500)
+          .end(function(err, res) {
+            if (err) return done(err);
+            var expectedDetail = res.body.error;
+            delete expectedDetail.statusCode;
+
+            request(app).get(method(errArray).url)
+              .set('Accept', 'application/json')
+              .expect(500)
+              .end(function(err, res) {
+                if (err) return done(err);
+                var error = res.body.error;
+                expect(error).to.have.property('message').that.match(/multiple errors/);
+                expect(error).to.include.keys('details');
+                expect(error.details).to.include(expectedDetail);
+                done();
+              });
+          });
+      });
+
       it('should return 500 if an error string is thrown', function(done) {
         remotes.shouldThrow = {
           bar: function(fn) {
@@ -1970,6 +2039,25 @@ describe('strong-remoting-rest', function() {
         // Notice that the id was correctly coerced to a Number ^^^^
         done();
       });
+    });
+
+    it('should prioritise auth errors over sharedCtor errors', function(done) {
+      var method = givenSharedPrototypeMethod();
+      method.ctor._sharedCtor = function(ctx, next) {
+        var err = new Error('Not Found');
+        err.statusCode = 404;
+        next(err);
+      };
+
+      objects.authorization = function(ctx, next) {
+        var err = new Error('Not Authorized');
+        err.statusCode = 401;
+        next(err);
+      };
+
+      json(method.getUrlForId('instId'))
+        // Verify that we return 401 Not Authorized and hide 404 Not Found
+        .expect(401, done);
     });
   });
 
